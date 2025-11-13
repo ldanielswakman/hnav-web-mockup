@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HNAV Springboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f5f7f9;
+    --panel-bg: #ffffff;
+    --text: rgba(0, 10, 25, 0.8);
+    --muted: #6b7280;
+    --divider: #e5e7eb;
+    --chip-orange: #d87905;
+    --chip-blue: #0ea5e9;
+    --chip-gray: #6b7280;
+    --accent: rgba(18, 110, 248, 1);
+    --shadow-strong: 0 12px 30px rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.08);
+    --shadow-soft: 0 10px 24px rgba(0,0,0,.10);
+    --radius-xxl: 8px;
+    --radius-xl: 14px;
+    --radius-full: 9999px;
+    --panel-width: 512px; /* left card width */
+    font-size: 2rem;
+  }
+
+  /* Page scaffold (map-like backdrop) */
+* {
+    box-sizing: border-box;
+}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 800px at 75% 50%, #e9f3fb 0, #e9f3fb 40%, #d5eefb 41%, #e9f3fb 42%, #e9f3fb 100%),
+      linear-gradient(90deg, #ecf1f5 0%, #e8edf2 100%);
+    background: url('map.png') no-repeat center center / cover;
+    min-height:100dvh;
+    font-family: "Fira Sans", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .app{
+    position:relative;
+    width:100%;
+    height:100dvh;
+    display: flex;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 16px;
+    overflow: hidden;
+  }
+  
+  /* Left floating panel */
+  .panel{
+    width:var(--panel-width);
+    background:var(--panel-bg);
+    border-radius: var(--radius-xxl);
+    box-shadow: var(--shadow-strong);
+    border:1px solid #eef0f3;
+    overflow: hidden;
+  }
+
+  /* Search row (96px height requirement) */
+  .search{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    padding:12px 8px 12px 32px;
+  }
+  .search-input{
+    display:flex;
+    align-items:center;
+    padding:0 32px;
+    gap:12px;
+    background:#fff;
+    border:1px solid rgba(18, 41, 84, 0.3);
+    border-radius: 999px;
+    height:96px;                 /* ← EXACT HEIGHT */
+    flex:1;
+  }
+  .search-input input{
+    border:0;
+    outline:0;
+    background:transparent;
+    font: inherit;
+    font-size:36px;
+    line-height:1.2;
+    width:100%;
+    color:var(--text);
+    /* make the input fill the full 96px height of its container */
+    height:100%;
+    padding:0;
+  }
+  .search-input input::placeholder {
+    color: rgba(0, 10, 25, 0.8);
+    font-weight: 500;
+  }
+  .icon-btn{
+    width:80px; height:80px;
+    display:grid; place-items:center;
+    border-radius: var(--radius-full);
+    border:1px solid #e5e7eb;
+    border: none;
+    background:white;
+    cursor:pointer;
+  }
+  .icon{
+    width:22px; height:22px; display:block; color:#4b5563;
+  }
+
+  /* Category chips */
+  .chips{
+    display:flex; gap: 52px;
+    justify-content: center;
+    padding: 8px 24px 16px 24px;
+    align-items:center;
+  }
+  .chip{
+    width:96px; height:96px;
+    border-radius: var(--radius-full);
+    display:grid; place-items:center;
+    font-weight:700; color:white;
+    font-size:28px; /* scale emoji/text for larger chip */
+  }
+  .chip--orange{ background: var(--chip-orange); }
+  .chip--gray{   background: var(--chip-gray); }
+  .chip--blue{   background: var(--chip-blue); }
+
+  /* Pager dots */
+  .dots{
+    display:flex; gap: 16px;
+    align-items:center;
+    justify-content:center;
+    padding: 16px;;
+  }
+  .dot{
+    width: 16px; height: 16px; border-radius:50%;
+    background:#c7cdd6;
+  }
+  .dot.active{ background:#94a3b8; }
+
+  /* List */
+  .list{
+    margin-top: 16px;
+    padding: 0 24px;
+  }
+  .row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px;
+    border-bottom:1px solid var(--divider);
+    background:white;
+  }
+  .row:last-child {
+    border-bottom: none;
+  }
+  .row-left{
+    display:flex; align-items:center;
+    padding: 24px 16px;
+    gap: 24px;
+    min-width:0;
+  }
+  .row-title{
+    font-weight: 400; color:var(--text);
+  }
+  .row-subtle{
+    font-size:16px; color:var(--muted);
+  }
+  .row-cta{
+    display:flex;
+    align-items:center;
+    padding: 20px 16px;
+    gap:16px;
+    color: var(--accent); font-size: 1rem; font-weight: 500; cursor:pointer;
+    flex-shrink:0;
+  }
+  .chevron{ width:18px; height:18px; color:#9aa3ad; }
+
+  /* Left vertical rail (icons column) */
+  .rail {
+    background:white; border-radius: 999px;
+    box-shadow: var(--shadow-strong);
+    border:1px solid #eef0f3;
+    border: none;
+    display:flex; flex-direction:column; align-items:center;
+    padding:8px;
+    gap:16px;
+  }
+  .rail .rail-btn{
+    background: none;
+    width:80px; height:80px; display:grid; place-items:center;
+    border-radius: var(--radius-full); cursor:pointer;
+    border: none;
+  }
+  .rail .rail-btn.selected { background: rgba(18, 110, 248, 0.05);}
+  .rail .rail-btn:hover{ background:#F2F5F9; }
+
+  /* Small helpers */
+  .badge{
+    min-width:26px; height:26px; border-radius:999px; display:grid; place-items:center;
+    font-size:12px; font-weight:700; color:#111827; background:#fde68a; border:1px solid #facc15;
+    padding:0 6px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.14);
+  }
+
+  .map-focus {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    pointer-events: none; /* make sure this overlay doesn't block interactions */
+  }
+  
+  .ccp {
+    position: absolute;
+    top: 50%;
+    left: calc(50% + 1.5rem);
+    width: 108px;
+    height: 108px;
+    background: url('ccp.png') no-repeat center center / cover;
+  }
+
+  .speed-limit {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 104px;
+    height: 104px;
+    border-radius: 52px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 8px solid #FB0425;
+    outline: 2px solid white;
+    font-weight: 500;
+  }
+
+  /* Right stack of floating controls (visual only) */
+  .stack{
+    height: 100%;
+    display:flex;
+    flex-direction:column;
+    justify-content: flex-end;
+    gap:14px;
+  }
+  .round{
+    width:96px; min-height:96px; border-radius:48px;
+    padding: 32px 0;
+    background:#fff; border:1px solid #eef0f3; box-shadow: var(--shadow-strong);
+    display:grid; place-items:center;
+    gap: 64px;
+  }
+
+  /* map label bubble bottom */
+  .street-pill{
+    padding:18px 28px; background:white; border:1px solid #eef0f3;
+    border-radius:999px; box-shadow: var(--shadow-strong);
+    color:rgba(7, 23, 49, 0.6); font-weight:500;
+    opacity: 0.9;
+  }
+
+  /* Accessibility focus */
+  .icon-btn:focus-visible, .rail .rail-btn:focus-visible, .chip:focus-visible, .row:focus-visible {
+    outline:3px solid #93c5fd; outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Left vertical rail -->
+  <div class="rail" aria-label="Quick actions">
+    <button class="rail-btn selected" aria-label="Search">
+        <!-- magnifier -->
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30 27.18L23.78 20.94C25.2299 18.9169 26.0066 16.489 26 14C26 11.6266 25.2962 9.30655 23.9776 7.33316C22.6591 5.35977 20.7849 3.8217 18.5922 2.91345C16.3995 2.0052 13.9867 1.76756 11.6589 2.23058C9.33115 2.6936 7.19295 3.83649 5.51472 5.51472C3.83649 7.19295 2.6936 9.33115 2.23058 11.6589C1.76756 13.9867 2.0052 16.3995 2.91345 18.5922C3.8217 20.7849 5.35977 22.6591 7.33316 23.9776C9.30655 25.2962 11.6266 26 14 26C16.489 26.0066 18.9169 25.2299 20.94 23.78L27.18 30L30 27.18ZM14 22C12.4178 22 10.871 21.5308 9.55544 20.6518C8.23985 19.7727 7.21447 18.5233 6.60897 17.0615C6.00347 15.5997 5.84504 13.9911 6.15372 12.4393C6.46241 10.8874 7.22433 9.46197 8.34315 8.34315C9.46197 7.22433 10.8874 6.46241 12.4393 6.15372C13.9911 5.84504 15.5997 6.00347 17.0615 6.60897C18.5233 7.21447 19.7727 8.23985 20.6518 9.55544C21.5308 10.871 22 12.4178 22 14C22 16.1217 21.1572 18.1566 19.6569 19.6569C18.1566 21.1572 16.1217 22 14 22Z" fill="#000A19" fill-opacity="0.8"/>
+        </svg>
+    </button>
+    <button class="rail-btn" aria-label="Car">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24.497 10H20.897L17.897 5H9.29702L6.29702 10H11.697V10.6C10.697 11 9.69702 11.8 9.09702 12.6C8.69702 12.2 8.29702 12 7.69702 12C6.49702 12 5.69702 12.8 5.69702 14C5.69702 14.8 6.29702 15.6 7.09702 15.8L4.49702 20H3.69702C2.49702 20 1.69702 19 1.69702 17.8V13.2C1.69702 12.4 1.89702 11.8 2.29702 11.2L6.49702 4C7.29702 2.8 8.49702 2 9.89702 2H17.297C18.697 2 20.097 2.8 20.697 4L24.497 10ZM29.697 23.2V28C29.697 29.2 28.897 30.2 27.697 30.2H23.697L21.697 27.2H13.697L11.697 30H7.69702C6.49702 30 5.69702 29 5.69702 27.8V23C5.69702 22.2 5.89702 21.6 6.29702 21L10.497 14C11.297 12.8 12.497 12 13.897 12H21.297C22.697 12 24.097 12.8 24.697 14L28.897 21.2C29.497 21.6 29.697 22.4 29.697 23.2ZM13.697 24C13.697 22.8 12.897 22 11.697 22C10.497 22 9.69702 22.8 9.69702 24C9.69702 25.2 10.497 26 11.697 26C12.897 26 13.697 25.2 13.697 24ZM25.097 20L22.097 15H13.297L10.297 20H25.097ZM25.697 24C25.697 22.8 24.897 22 23.697 22C22.497 22 21.697 22.8 21.697 24C21.697 25.2 22.497 26 23.697 26C24.897 26 25.697 25.2 25.697 24Z" fill="#000A19" fill-opacity="0.8"/>
+        </svg>
+    </button>
+    <button class="rail-btn" aria-label="Settings">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M27 16C27.004 15.3291 26.9438 14.6594 26.82 14L30 11L27.22 6.16L23.04 7.58C22.0477 6.77001 20.9251 6.13431 19.72 5.7L18.8 2H13.22L12.3 5.7C11.0613 6.15612 9.91602 6.83382 8.92 7.7L4.8 6.16L2 11L5.18 14C5.05624 14.6594 4.99597 15.3291 5 16C5.00538 16.6714 5.07233 17.3408 5.2 18L2 21.14L4.78 26L8.98 24.52C9.97602 25.3862 11.1213 26.0639 12.36 26.52L13.28 30H18.86L19.52 26.42C20.8255 25.9777 22.0389 25.2998 23.1 24.42L27.1 25.82L30 21L26.82 18C26.9482 17.3412 27.0085 16.6711 27 16ZM16 22C14.8133 22 13.6533 21.6481 12.6666 20.9888C11.6799 20.3295 10.9108 19.3925 10.4567 18.2961C10.0026 17.1997 9.88378 15.9933 10.1153 14.8295C10.3468 13.6656 10.9182 12.5965 11.7574 11.7574C12.5965 10.9182 13.6656 10.3468 14.8295 10.1153C15.9933 9.88378 17.1997 10.0026 18.2961 10.4567C19.3925 10.9108 20.3295 11.6799 20.9888 12.6666C21.6481 13.6533 22 14.8133 22 16C22 17.5913 21.3679 19.1174 20.2426 20.2426C19.1174 21.3679 17.5913 22 16 22Z" fill="#000A19" fill-opacity="0.8"/>
+        </svg>
+    </button>
+  </div>
+
+  <!-- Main left panel -->
+  <aside class="panel" aria-label="Search panel">
+    <div class="search">
+      <div class="search-input">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30 27.18L23.78 20.94C25.2299 18.9169 26.0066 16.489 26 14C26 11.6266 25.2962 9.30655 23.9776 7.33316C22.6591 5.35977 20.7849 3.8217 18.5922 2.91345C16.3995 2.0052 13.9867 1.76756 11.6589 2.23058C9.33115 2.6936 7.19295 3.83649 5.51472 5.51472C3.83649 7.19295 2.6936 9.33115 2.23058 11.6589C1.76756 13.9867 2.0052 16.3995 2.91345 18.5922C3.8217 20.7849 5.35977 22.6591 7.33316 23.9776C9.30655 25.2962 11.6266 26 14 26C16.489 26.0066 18.9169 25.2299 20.94 23.78L27.18 30L30 27.18ZM14 22C12.4178 22 10.871 21.5308 9.55544 20.6518C8.23985 19.7727 7.21447 18.5233 6.60897 17.0615C6.00347 15.5997 5.84504 13.9911 6.15372 12.4393C6.46241 10.8874 7.22433 9.46197 8.34315 8.34315C9.46197 7.22433 10.8874 6.46241 12.4393 6.15372C13.9911 5.84504 15.5997 6.00347 17.0615 6.60897C18.5233 7.21447 19.7727 8.23985 20.6518 9.55544C21.5308 10.871 22 12.4178 22 14C22 16.1217 21.1572 18.1566 19.6569 19.6569C18.1566 21.1572 16.1217 22 14 22Z" fill="#000A19" fill-opacity="0.8"/>
+        </svg>
+        <input type="text" placeholder="Search here" aria-label="Search here" />
+      </div>
+      <button class="icon-btn" aria-label="Close">
+        <!-- replaced close icon with circular close + X for better hit area & visuals -->
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M25.18 28L16 18.78L6.82 28L4 25.08L13.12 16L4 6.82L6.82 4L16 13.12L25.08 4L28 6.82L18.78 16L28 25.18L25.18 28Z" fill="#071731" fill-opacity="0.6"/>
+        </svg>
+
+      </button>
+    </div>
+
+    <div class="chips" role="group" aria-label="Categories">
+      <div class="chip chip--orange" aria-label="Food">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M26.6667 2.66669V29.3334H22.6667V18.6667H20V12C20 5.33335 26.6667 2.66669 26.6667 2.66669ZM13.3333 2.66669V9.33335H11.3333V2.66669H8.66667V9.33335H6.66667V2.66669H4V9.74669C4.00033 10.7683 4.39152 11.751 5.09333 12.4934L7.6 14.6667C7.73087 14.7949 7.83393 14.9486 7.90275 15.1184C7.97157 15.2881 8.00468 15.4702 8 15.6534V29.3334H12V15.6534C11.997 15.4693 12.0322 15.2866 12.1034 15.1168C12.1745 14.9469 12.2801 14.7937 12.4133 14.6667L14.8267 12.6C15.577 11.8506 15.9991 10.8339 16 9.77335V2.66669H13.3333Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="chip chip--gray"   aria-label="Lightning">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 30H14L15 18H6L14 2H18L17 14H26L18 30Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="chip chip--blue"   aria-label="Parking">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15.8666 6.66669H9.33325V26.6667H14.6666V20.72H16.3999C21.2666 20.72 24.6666 18.36 24.6666 13.5334C24.6666 8.93335 21.3333 6.66669 15.8666 6.66669ZM16.7466 16.8934H14.6666V10.5067H16.6133C18.8799 10.5067 19.9466 11.5734 19.9466 13.6C19.9999 16 18.7866 16.8934 16.7466 16.8934Z" fill="white"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="dots" aria-hidden="true">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+    </div>
+
+    <div class="list" role="list">
+      <div class="row" role="listitem">
+        <div class="row-left">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.6 4.23999L30 14V30H20V20H12V30H2V14L13.4 4.23999C14.1245 3.62027 15.0466 3.27972 16 3.27972C16.9534 3.27972 17.8755 3.62027 18.6 4.23999Z" fill="#071731" fill-opacity="0.6"/>
+            </svg>
+          <div class="row-title">Home</div>
+        </div>
+        <div class="row-cta">
+          <span>Add</span>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 2C13.2311 2 10.5243 2.82109 8.22202 4.35943C5.91973 5.89777 4.12532 8.08427 3.06569 10.6424C2.00607 13.2006 1.72882 16.0155 2.26901 18.7313C2.80921 21.447 4.14258 23.9416 6.10051 25.8995C8.05845 27.8574 10.553 29.1908 13.2687 29.731C15.9845 30.2712 18.7994 29.9939 21.3576 28.9343C23.9157 27.8747 26.1022 26.0803 27.6406 23.778C29.1789 21.4757 30 18.7689 30 16C30 12.287 28.525 8.72601 25.8995 6.1005C23.274 3.475 19.713 2 16 2ZM24 18H18V24H14V18H8.00001V14H14V8H18V14H24V18Z" fill="#126EF8"/>
+            </svg>
+        </div>
+      </div>
+
+      <div class="row" role="listitem">
+        <div class="row-left">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M26 10H22V8C22 6.93913 21.5786 5.92172 20.8284 5.17157C20.0783 4.42143 19.0609 4 18 4H14C12.9391 4 11.9217 4.42143 11.1716 5.17157C10.4214 5.92172 10 6.93913 10 8V10H6C4.93913 10 3.92172 10.4214 3.17157 11.1716C2.42143 11.9217 2 12.9391 2 14V26C2 27.0609 2.42143 28.0783 3.17157 28.8284C3.92172 29.5786 4.93913 30 6 30H26C27.0609 30 28.0783 29.5786 28.8284 28.8284C29.5786 28.0783 30 27.0609 30 26V14C30 12.9391 29.5786 11.9217 28.8284 11.1716C28.0783 10.4214 27.0609 10 26 10V10ZM13 7H19V10H13V7Z" fill="#071731" fill-opacity="0.6"/>
+            </svg>
+          <div class="row-title">Work</div>
+        </div>
+        <div class="row-cta">
+          <span>Add</span>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 2C13.2311 2 10.5243 2.82109 8.22202 4.35943C5.91973 5.89777 4.12532 8.08427 3.06569 10.6424C2.00607 13.2006 1.72882 16.0155 2.26901 18.7313C2.80921 21.447 4.14258 23.9416 6.10051 25.8995C8.05845 27.8574 10.553 29.1908 13.2687 29.731C15.9845 30.2712 18.7994 29.9939 21.3576 28.9343C23.9157 27.8747 26.1022 26.0803 27.6406 23.778C29.1789 21.4757 30 18.7689 30 16C30 12.287 28.525 8.72601 25.8995 6.1005C23.274 3.475 19.713 2 16 2ZM24 18H18V24H14V18H8.00001V14H14V8H18V14H24V18Z" fill="#126EF8"/>
+            </svg>
+        </div>
+      </div>
+
+      <div class="row" role="listitem">
+        <div class="row-left">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11.8 12L14.4 3.20001C14.6 2.60001 15 2.20001 15.4 2.00001C16.4 1.80001 17.4 2.20001 17.6 3.20001L20.2 12H28.2C28.8 12 29.2 12.2 29.6 12.8C30.2 13.6 30 14.6 29.2 15.2L22.8 19L25.4 27.8C25.6 28.4 25.4 29 25.2 29.4C24.6 30.2 23.6 30.4 22.8 29.8L16 24.4L9.2 29.6C8.6 30 8.2 30 7.6 30C6.6 29.8 6.2 28.8 6.4 27.8L9 19L2.8 15.2C2.2 14.8 2 14.4 2 13.8C2 12.8 2.8 12 3.8 12H11.8Z" fill="#071731" fill-opacity="0.6"/>
+            </svg>
+          <div class="row-title">Favorites</div>
+        </div>
+        <div class="row-cta">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.3399 16L11.1799 6.82L13.9999 4L25.9999 16L13.9999 28L11.1799 25.18L20.3399 16Z" fill="#071731" fill-opacity="0.6"/>
+            </svg>
+        </div>
+      </div>
+
+      <div class="row" role="listitem">
+        <div class="row-left">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 30L16 24L26 30V5C26 4.20435 25.6839 3.44129 25.1213 2.87868C24.5587 2.31607 23.7956 2 23 2H9C8.20435 2 7.44129 2.31607 6.87868 2.87868C6.31607 3.44129 6 4.20435 6 5V30Z" fill="#071731" fill-opacity="0.6"/>
+            </svg>
+          <div class="row-title">Planned trips</div>
+        </div>
+        <div class="row-cta">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.3399 16L11.1799 6.82L13.9999 4L25.9999 16L13.9999 28L11.1799 25.18L20.3399 16Z" fill="#071731" fill-opacity="0.6"/>
+            </svg>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="map-focus">
+    <div class="ccp" aria-hidden="true"></div>
+    <div class="street-pill" aria-hidden="true">Heidestraße</div>
+  </div>
+
+  <div class="speed-limit" aria-hidden="true">
+    <span>50</span>
+  </div>
+
+  <!-- Right-side floating UI (visual only; mirrors the screenshot composition) -->
+  <div class="stack" aria-hidden="true">
+    <div class="round">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 16C21.991 14.4968 21.6741 13.0113 21.0687 11.6354C20.4632 10.2594 19.5822 9.02218 18.48 8L15.74 10.88C16.4533 11.5286 17.0232 12.3191 17.4132 13.2008C17.8032 14.0824 18.0047 15.0359 18.0047 16C18.0047 16.9641 17.8032 17.9176 17.4132 18.7992C17.0232 19.6809 16.4533 20.4714 15.74 21.12L18.48 24C19.5822 22.9778 20.4632 21.7406 21.0687 20.3646C21.6741 18.9887 21.991 17.5032 22 16ZM30 16C30.0094 13.3521 29.452 10.7328 28.3654 8.31808C27.2788 5.90336 25.688 3.74911 23.7 2L20.98 5C22.5561 6.36678 23.8201 8.0563 24.6864 9.95414C25.5526 11.852 26.0009 13.9138 26.0009 16C26.0009 18.0862 25.5526 20.148 24.6864 22.0459C23.8201 23.9437 22.5561 25.6332 20.98 27L23.7 30C25.688 28.2509 27.2788 26.0966 28.3654 23.6819C29.452 21.2672 30.0094 18.6479 30 16ZM12 6V26L6 22H2V10H6L12 6Z" fill="#000A19" fill-opacity="0.8"/>
+        </svg>
+    </div>
+    <div class="round">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15.2771 2.16L2.87705 8.16C2.61451 8.28521 2.39281 8.48222 2.23759 8.72822C2.08238 8.97421 2 9.25913 2 9.55C2 9.84087 2.08238 10.1258 2.23759 10.3718C2.39281 10.6178 2.61451 10.8148 2.87705 10.94L15.2771 16.94C15.5025 17.0454 15.7482 17.1 15.9971 17.1C16.2459 17.1 16.4917 17.0454 16.7171 16.94L29.1171 10.94C29.3796 10.8148 29.6013 10.6178 29.7565 10.3718C29.9117 10.1258 29.9941 9.84087 29.9941 9.55C29.9941 9.25913 29.9117 8.97421 29.7565 8.72822C29.6013 8.48222 29.3796 8.28521 29.1171 8.16L16.7171 2.16C16.4917 2.05462 16.2459 2 15.9971 2C15.7482 2 15.5025 2.05462 15.2771 2.16Z" fill="#000A19" fill-opacity="0.8"/>
+            <path d="M22.4971 17.76L29.1171 20.98C29.3796 21.1052 29.6013 21.3022 29.7565 21.5482C29.9117 21.7942 29.9941 22.0791 29.9941 22.37C29.9941 22.6609 29.9117 22.9458 29.7565 23.1918C29.6013 23.4378 29.3796 23.6348 29.1171 23.76L16.7171 29.76C16.4917 29.8654 16.2459 29.92 15.9971 29.92C15.7482 29.92 15.5025 29.8654 15.2771 29.76L2.87705 23.76C2.61451 23.6348 2.39281 23.4378 2.23759 23.1918C2.08238 22.9458 2 22.6609 2 22.37C2 22.0791 2.08238 21.7942 2.23759 21.5482C2.39281 21.3022 2.61451 21.1052 2.87705 20.98L9.49705 17.76L14.1571 19.96C14.731 20.2365 15.36 20.3801 15.9971 20.3801C16.6342 20.3801 17.2631 20.2365 17.8371 19.96L22.4971 17.76Z" fill="#000A19" fill-opacity="0.8"/>
+        </svg>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 30H14L15 18H6L14 2H18L17 14H26L18 30Z" fill="#000A19" fill-opacity="0.8"/>
+        </svg>
+    </div>
+  </div>
+</div>
+</body>
+</html>
